@@ -24,6 +24,7 @@ void SGM::rawCostCalculate()
 		{
 			for(int j=0; j<W; j++)
 			{
+				//if (useMask && m_maskImg.at<uchar>(i,j) == 0) continue;
 				int jr = max(0,j-d);
 				m_rawCostCube->at<double>(d,i,j) = abs(( double)m_imgL.at<uchar>(i,j) - ( double)m_imgR.at<uchar>(i,jr) );
 				
@@ -35,7 +36,8 @@ void SGM::rawCostCalculate()
 
 void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(int x,int y,int d, int x_r, int y_r)
 {
-clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
+//clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
+
 	for(int d=0; d<m_dispLevels; d++)
 	{
 		double smooth_term = 1e20;// 
@@ -77,7 +79,7 @@ clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
 	for(int dd=0; dd<m_dispLevels; dd++)
 		m_sgmCostCube->at<double>(dd,y,x) -= m ;
 
- if (cnt%100000 ==100000-1) cout<<clock()-timer<<endl;
+ //if (cnt%100000 ==100000-1) cout<<clock()-timer<<endl;
 }
 void SGM::sgmCostCalculate()
 {
@@ -96,8 +98,9 @@ void SGM::sgmCostCalculate()
 	{
 		for(int x=0; x<W; x++)
 		{
+			//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
 			//for(int d=0; d<m_dispLevels; d++)
-			{		
+			//{		
 				int x_r=0,y_r=0;
 				//if ()
 				//left
@@ -128,7 +131,7 @@ void SGM::sgmCostCalculate()
 					pathEvaluate(x, y, x_r, y_r);
 				}
 				
-			}
+			//}
 		}
 	}
 
@@ -137,8 +140,9 @@ void SGM::sgmCostCalculate()
 	{
 		for(int x=W-1; x>=0; x--)
 		{
+			//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
 			//for(int d=0; d<m_dispLevels; d++)
-			{		
+			//{		
 				int x_r=0,y_r=0;
 				//if ()
 				//right
@@ -153,7 +157,7 @@ void SGM::sgmCostCalculate()
 				//bottom-left
 				x_r = max(x-1,0); y_r = min(y+1,H-1);
 				pathEvaluate(x, y, x_r, y_r);
-			}
+			//}
 		}
 	}
 	
@@ -162,6 +166,8 @@ void SGM::sgmCostCalculate()
 	{
 		for(int j=0; j<W; j++)
 		{
+			//if (useMask && m_maskImg.at<uchar>(i,j) == 0) continue;
+
 			double min = 1e20;
 			int d_min = 0;
 			for(int d=0; d<m_dispLevels; d++)
@@ -183,4 +189,245 @@ void SGM::sgmRun()
 {
 	rawCostCalculate();
 	sgmCostCalculate();
+}
+
+
+void SGM::dispFromMask()
+{
+	int W = m_maskImgL.cols;
+	int H = m_maskImgL.rows;
+	//vector<vector <int> > leftMaskEdge;
+	m_leftMaskEdge.resize(H);
+	m_rightMaskEdge.resize(H);
+	//提取左 mask 边界
+	for(int i=0; i<H; i++)
+	{
+		for(int j=0; j<W; j++)
+		{
+			if (m_maskImgL.at<uchar>(i,j) == 0) continue;
+			else
+			{
+				m_leftMaskEdge[i].push_back(j); //左边界x
+				break;
+			}
+
+		}
+
+		for(int j=W-1; j>=0; j--)
+		{
+			//assert(j<W);
+			if (m_maskImgL.at<uchar>(i,j) == 0) continue;
+			else
+			{
+				m_leftMaskEdge[i].push_back(j); //右边界x
+				break;
+			}
+		}
+	}
+
+	//提取右 mask 边界
+	for(int i=0; i<H; i++)
+	{
+		for(int j=0; j<W; j++)
+		{
+			if (m_maskImgR.at<uchar>(i,j) == 0) continue;
+			else
+			{
+				m_rightMaskEdge[i].push_back(j);
+				break;
+			}
+
+		}
+
+		for(int j=W-1; j>=0; j--)
+		{
+			if (m_maskImgR.at<uchar>(i,j) == 0) continue;
+			else
+			{
+				m_rightMaskEdge[i].push_back(j);
+				break;
+			}
+		}
+	}
+
+	for(int i=0;i<H; i++)
+	{
+		if(m_leftMaskEdge[i].size()==0 || m_rightMaskEdge[i].size()==0 ) continue; //跳过全黑行
+
+		int disp_le = abs(m_leftMaskEdge[i][0] - m_rightMaskEdge[i][0]);
+		int disp_re = abs(m_leftMaskEdge[i][1] - m_rightMaskEdge[i][1]);
+		m_maskEdgeDisp[i].push_back(disp_le);
+		m_maskEdgeDisp[i].push_back(disp_re);
+
+	}
+
+	
+
+
+}
+
+
+void SGM::maskRawCostCalculate()
+{
+	int H = m_imgL.rows;
+	int W = m_imgL.cols;
+
+	if (m_rawCostCube != NULL) delete m_rawCostCube;
+	
+	int size[3];
+	size[0] = m_dispLevels; size[1] = H; size[2] = W;
+	double val = 1e5;
+	m_rawCostCube = new cv::Mat(3,size,CV_64FC1,Scalar(val));
+	/*imshow("tst",m_imgL);
+	waitKey(0);*/
+	for(int d=0; d<m_dispLevels; d++)
+	{
+		
+		for(int i=0; i<m_leftMaskEdge.size(); i++)
+		{
+			if (m_leftMaskEdge[i].size() == 0) continue; //全黑行跳过
+
+			for(int j=m_leftMaskEdge[i][0]; j<=m_leftMaskEdge[i][1]; j++)
+			{
+				//if (useMask && m_maskImg.at<uchar>(i,j) == 0) continue;
+				int dd = 0.5*(m_maskEdgeDisp[i][0]+ m_maskEdgeDisp[i][1]) + (d - 0.5*m_dispLevels);
+				int disp = max(0, dd );
+				/*if ( (j==m_leftMaskEdge[i][0] || j == m_leftMaskEdge[i][1])  )
+				{
+					m_rawCostCube->at<double>(d,i,j) = 0;
+				}
+				else*/
+				{
+					int jr = max(0,j-disp);
+					m_rawCostCube->at<double>(d,i,j) = abs(( double)m_imgL.at<uchar>(i,j) - ( double)m_imgR.at<uchar>(i,jr) );
+				}
+
+				
+			}
+		}
+	}	
+		
+}
+
+void SGM::maskSgmCostCalculate()
+{
+	int H = m_imgL.rows;
+	int W = m_imgL.cols;
+
+	if(m_sgmCostCube != NULL) delete m_sgmCostCube;
+
+	int size[3];
+	size[0] = m_dispLevels; size[1] = H; size[2] = W;
+	double val = 0;//1e5;//
+	m_sgmCostCube = new Mat(3,size,CV_64FC1,Scalar(val));
+
+	//从上到下
+	for(int y=0; y<H; y++)
+	{
+		if (m_leftMaskEdge[y].size() == 0) continue;
+		for(int x=m_leftMaskEdge[y][0]; x<=m_leftMaskEdge[y][1]; x++)
+		{
+			if ( m_maskImgL.at<uchar>(y,x) == 0) continue;
+			//for(int d=0; d<m_dispLevels; d++)
+			//{		
+			int x_r=0,y_r=0;
+			//if ()
+			//left
+			//if(x>=1)
+			{
+				x_r = max(x-1,0); y_r = y;
+				if(m_maskImgL.at<uchar>(y_r,x_r)!=0) 
+					pathEvaluate(x, y, x_r, y_r);
+			}
+
+			//top-left
+			//if (x>=1 && y>=1)
+			{
+				x_r = max(x-1,0); y_r = max(y-1,0);
+				if(m_maskImgL.at<uchar>(y_r,x_r)!=0) 
+					pathEvaluate(x, y, x_r, y_r);
+			}
+
+			//top
+			//if (y>=1)
+			{
+				x_r = x; y_r = max(y-1,0);
+				if(m_maskImgL.at<uchar>(y_r,x_r)!=0) 
+					pathEvaluate(x, y, x_r, y_r);
+			}
+
+			//top-right
+			//	if (y>=1 && x<W-1)
+			{
+				x_r = min(x+1,W-1); y_r = max(y-1,0);
+				if(m_maskImgL.at<uchar>(y_r,x_r)!=0) 
+					pathEvaluate(x, y, x_r, y_r);
+			}
+
+			//}
+		}
+	}
+
+	//从下到上
+	for(int y=H-1; y>=0; y--)
+	{
+		if (m_leftMaskEdge[y].size() == 0) continue;
+		for(int x=m_leftMaskEdge[y][1]; x>=m_leftMaskEdge[y][0]; x--)
+		{
+			if ( m_maskImgL.at<uchar>(y,x) == 0) continue;//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
+			//for(int d=0; d<m_dispLevels; d++)
+			//{		
+			int x_r=0,y_r=0;
+			//if ()
+			//right
+			x_r = min(x+1,W-1); y_r = y;
+			if(m_maskImgL.at<uchar>(y_r,x_r)!=0)
+				pathEvaluate(x, y,  x_r, y_r);
+			//bottom-right
+			x_r = min(x+1,W-1); y_r = min(y+1,H-1);
+			if(m_maskImgL.at<uchar>(y_r,x_r)!=0)
+				pathEvaluate(x, y, x_r, y_r);
+			//bottom
+			x_r = x; y_r = min(y+1,H-1);
+			if(m_maskImgL.at<uchar>(y_r,x_r)!=0)
+				pathEvaluate(x, y, x_r, y_r);
+			//bottom-left
+			x_r = max(x-1,0); y_r = min(y+1,H-1);
+			if(m_maskImgL.at<uchar>(y_r,x_r)!=0)
+				pathEvaluate(x, y, x_r, y_r);
+			//}
+		}
+	}
+
+
+	for(int i=0; i<H; i++)
+	{
+		for(int j=0; j<W; j++)
+		{
+			if (m_maskImgL.at<uchar>(i,j) == 0) continue;
+
+			double min = 1e20;
+			int d_min = 0;
+			for(int d=0; d<m_dispLevels; d++)
+			{
+				double cost_t = m_sgmCostCube->at<double>(d,i,j);
+				if (cost_t < min)
+				{
+					min = cost_t;
+					d_min = d;
+				}
+			}
+			int disp = 0.5*(m_maskEdgeDisp[i][0]+ m_maskEdgeDisp[i][1]) + (d_min - 0.5*m_dispLevels);
+			m_dispImg.at<double>(i,j) = std::max (disp,0);//d_min ;//0.5*(m_maskEdgeDisp[i][0]+ m_maskEdgeDisp[i][1]) + (d - 0.5*m_dispLevels);
+		}
+	}
+
+}
+
+
+void SGM:: maskSgmRun()
+{
+	dispFromMask();
+	maskRawCostCalculate();
+	maskSgmCostCalculate();
 }

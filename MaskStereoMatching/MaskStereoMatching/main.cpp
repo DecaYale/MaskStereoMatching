@@ -22,17 +22,20 @@ int main()
 	sprintf(dirL,"%s%d%s",root,2,"/view1.png");
 	sprintf(dirR,"%s%d%s",root,2,"/view5.png");
 
-	const cv::Mat imgL = cv::imread ("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
-	const cv::Mat imgR = cv::imread ("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat imgL = cv::imread ("data3/rect_left_000000.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	const cv::Mat imgR = cv::imread ("data3/mask_rect_right_000000.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat maskImgL = cv::imread("data3/mask_rect_left_000000.jpg",0);
+	const cv::Mat maskImgR = cv::imread("data3/mask_rect_right_000000.jpg",0);
 	Mat dispImg(imgL.size(),CV_64FC1,Scalar(0));
 	
 clock_t timer = clock();
-	SGM sgm(imgL,imgR,dispImg,20,2,100);
-	sgm.sgmRun(); 
+	SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,10,2,100);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
+	sgm.maskSgmRun(); //sgm.sgmRun(); 
 cout<<clock()-timer<<endl;
 
+	imwrite("data3/disp.jpg",dispImg);
 	imshow("1",imgL);
-	imshow("2",dispImg/20);
+	imshow("2",dispImg/500);
 	waitKey(0);
 }
 #elif 1
