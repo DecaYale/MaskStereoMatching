@@ -1,6 +1,8 @@
 
 #include "SGM.h"
 #include <highgui.h>
+#include "time.h"
+#include <iostream>
 using namespace cv;
 using namespace std;
 void SGM::rawCostCalculate()
@@ -33,6 +35,7 @@ void SGM::rawCostCalculate()
 
 void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(int x,int y,int d, int x_r, int y_r)
 {
+clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
 	for(int d=0; d<m_dispLevels; d++)
 	{
 		double smooth_term = 1e20;// 
@@ -64,6 +67,7 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(in
 
 	}
 
+
 	int m = 1e20;
 	for(int d_p=0; d_p<m_dispLevels; d_p++)
 	{
@@ -73,6 +77,7 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(in
 	for(int dd=0; dd<m_dispLevels; dd++)
 		m_sgmCostCube->at<double>(dd,y,x) -= m ;
 
+ if (cnt%100000 ==100000-1) cout<<clock()-timer<<endl;
 }
 void SGM::sgmCostCalculate()
 {
@@ -91,7 +96,7 @@ void SGM::sgmCostCalculate()
 	{
 		for(int x=0; x<W; x++)
 		{
-			for(int d=0; d<m_dispLevels; d++)
+			//for(int d=0; d<m_dispLevels; d++)
 			{		
 				int x_r=0,y_r=0;
 				//if ()
@@ -132,7 +137,7 @@ void SGM::sgmCostCalculate()
 	{
 		for(int x=W-1; x>=0; x--)
 		{
-			for(int d=0; d<m_dispLevels; d++)
+			//for(int d=0; d<m_dispLevels; d++)
 			{		
 				int x_r=0,y_r=0;
 				//if ()

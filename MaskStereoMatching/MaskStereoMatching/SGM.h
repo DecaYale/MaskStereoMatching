@@ -11,7 +11,7 @@ private:
 	int m_dispLevels;
 	double m_P1, m_P2;
 
-	void pathEvaluate(int x,int y,int x_r, int y_r);//void pathEvaluate(int x,int y,int d,int x_r, int y_r);
+	inline void pathEvaluate(int x,int y,int x_r, int y_r);//void pathEvaluate(int x,int y,int d,int x_r, int y_r);
 	void rawCostCalculate();
 	void sgmCostCalculate();
 public:
