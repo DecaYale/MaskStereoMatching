@@ -10,6 +10,10 @@ private:
 	cv::Mat & m_dispImg;
 	cv::Mat * m_rawCostCube;
 	cv::Mat * m_sgmCostCube;
+	cv::Mat * m_Lr0;
+	cv::Mat * m_Lr1;
+	cv::Mat * m_Lr2;
+	cv::Mat * m_Lr3;
 
 	std::vector<std::vector <int> > m_leftMaskEdge; //saving the x location of L&R side of the mask in m_maskImgL;
 	std::vector<std::vector <int> > m_rightMaskEdge;
@@ -23,6 +27,8 @@ private:
 	void dispFromMask();
 	void maskRawCostCalculate();
 	void maskSgmCostCalculate();
+	inline void maskPathEvaluate(int x,int y, int x_r, int y_r);
+	inline void pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr);
 public:
 	
 	SGM();
@@ -33,7 +39,10 @@ public:
 		m_imgR = imgR.clone();
 		m_rawCostCube = NULL;
 		m_sgmCostCube = NULL;
-		
+		m_Lr0 = NULL;
+		m_Lr1 = NULL;
+		m_Lr2 = NULL;
+		m_Lr3 = NULL;
 		//cv::Mat m_dispImg(imgL.size(),CV_64FC1,Scalar(0));
 		//m_dispImg = dispImg;
 	}

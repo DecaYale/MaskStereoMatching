@@ -10,9 +10,6 @@
 using namespace std;
 using namespace cv;
 
-
-
-
 #if 1
 int main()
 {
@@ -22,20 +19,66 @@ int main()
 	sprintf(dirL,"%s%d%s",root,2,"/view1.png");
 	sprintf(dirR,"%s%d%s",root,2,"/view5.png");
 
-	const cv::Mat imgL = cv::imread ("data3/rect_left_000000.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
-	const cv::Mat imgR = cv::imread ("data3/mask_rect_right_000000.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
-	const cv::Mat maskImgL = cv::imread("data3/mask_rect_left_000000.jpg",0);
-	const cv::Mat maskImgR = cv::imread("data3/mask_rect_right_000000.jpg",0);
+	const cv::Mat imgL = cv::imread("data4/rect_left_000035t.jpg",0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	const cv::Mat imgR = cv::imread("data4/rect_right_000035t.jpg",0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
+	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
+	Mat dispImg(imgL.size(),CV_64FC1,Scalar(0));
+
+	clock_t timer = clock();
+	SGM sgm(imgL,imgR,dispImg,100,2,500);//SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,100,10,1000);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
+	sgm.sgmRun(); //sgm.maskSgmRun(); //sgm.sgmRun(); 
+	cout<<clock()-timer<<endl;
+
+	//imwrite("data4/disp.jpg",dispImg);
+	imshow("1",imgL);
+	imshow("2",dispImg/100);
+	waitKey(0);
+}
+#elif	1	
+int main()
+{
+	
+
+	const cv::Mat imgL = cv::imread ("data4/rect_left_000035t.jpg",0);//("./data1/im0.ppm", 0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	const cv::Mat imgR = cv::imread ("data4/rect_right_000035t.jpg",0);//("./data1/im1.ppm", 0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
+	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
+
+	int p1,p2;
+	p1=2;p2=1000;
+	StereoSGBM sgm(0,320,1,p1,p2);
+	Mat disp,dispF;
+	sgm(imgL,imgR,disp);
+	disp.convertTo(dispF,CV_64FC1);
+	imwrite("dispSgmOpenCV.jpg",dispF/16);
+	imshow("1",dispF/320/16);
+	waitKey(0);
+
+}
+#elif 1
+int main()
+{
+	char root[] = "e:/MyDocument/klive sync/¼ÆËã»úÊÓ¾õ/Stereo_Matching/Data Set/Middlebury2006/half size/data";
+	char dirL[100];
+	char dirR[100];
+	sprintf(dirL,"%s%d%s",root,2,"/view1.png");
+	sprintf(dirR,"%s%d%s",root,2,"/view5.png");
+
+	const cv::Mat imgL = cv::imread( "./data1/im0.ppm", 0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	const cv::Mat imgR = cv::imread ("./data1/im1.ppm", 0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
+	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
 	Mat dispImg(imgL.size(),CV_64FC1,Scalar(0));
 	
 clock_t timer = clock();
-	SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,10,2,100);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
-	sgm.maskSgmRun(); //sgm.sgmRun(); 
+	SGM sgm(imgL,imgR,dispImg,30,2,1000);//SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,100,10,1000);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
+	sgm.sgmRun(); //sgm.maskSgmRun(); //sgm.sgmRun(); 
 cout<<clock()-timer<<endl;
 
-	imwrite("data3/disp.jpg",dispImg);
+	//imwrite("data4/disp.jpg",dispImg);
 	imshow("1",imgL);
-	imshow("2",dispImg/500);
+	imshow("2",dispImg/30);
 	waitKey(0);
 }
 #elif 1

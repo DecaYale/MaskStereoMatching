@@ -1,20 +1,30 @@
-﻿Build started 2016/4/12 16:59:25.
+﻿Build started 2016/4/15 20:55:48.
      1>Project "F:\GitHub\MaskStereoMatching\MaskStereoMatching\MaskStereoMatching\MaskStereoMatching.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Creating "x64\Release\MaskStereoMatching.unsuccessfulbuild" because "AlwaysCreate" was specified.
+         Touching "x64\Release\MaskStereoMatching.unsuccessfulbuild".
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt main.cpp SGM.cpp
          main.cpp
      1>D:\Program Files (x86)\opencv\build\include\opencv2/legacy/blobtrack.hpp(187): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(105) : see declaration of 'strcpy'
      1>D:\Program Files (x86)\opencv\build\include\opencv2/legacy/blobtrack.hpp(256): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\string.h(110) : see declaration of 'strcat'
-     1>main.cpp(22): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>main.cpp(19): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(371) : see declaration of 'sprintf'
-     1>main.cpp(23): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>main.cpp(20): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(371) : see declaration of 'sprintf'
+         SGM.cpp
+     1>SGM.cpp(71): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>SGM.cpp(71): warning C4056: overflow in floating-point constant arithmetic
+     1>SGM.cpp(74): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>SGM.cpp(119): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>SGM.cpp(119): warning C4056: overflow in floating-point constant arithmetic
+     1>SGM.cpp(122): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>SGM.cpp(446): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>SGM.cpp(446): warning C4056: overflow in floating-point constant arithmetic
+     1>SGM.cpp(449): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.exe" /INCREMENTAL:NO /NOLOGO opencv_calib3d2410.lib opencv_contrib2410.lib opencv_core2410.lib opencv_features2d2410.lib opencv_flann2410.lib opencv_gpu2410.lib opencv_highgui2410.lib opencv_imgproc2410.lib opencv_legacy2410.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Release\MaskStereoMatching.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.lib" /MACHINE:X64 x64\Release\main.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.exe" /INCREMENTAL:NO /NOLOGO opencv_calib3d2410.lib opencv_contrib2410.lib opencv_core2410.lib opencv_features2d2410.lib opencv_flann2410.lib opencv_gpu2410.lib opencv_highgui2410.lib opencv_imgproc2410.lib opencv_legacy2410.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB:cudart.lib /MANIFEST /ManifestFile:"x64\Release\MaskStereoMatching.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Release\MaskStereoMatching.lib" /MACHINE:X64 x64\Release\main.obj
          x64\Release\SGM.obj
          Generating code
          Finished generating code
@@ -28,4 +38,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.43
+Time Elapsed 00:00:01.76
