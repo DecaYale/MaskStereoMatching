@@ -18,8 +18,9 @@ void SGM::rawCostCalculate()
 	m_rawCostCube = new cv::Mat(3,size,CV_64FC1,Scalar(val));
 	/*imshow("tst",m_imgL);
 	waitKey(0);*/
-	for(int d=0; d<m_dispLevels; d++)
+	for(int di=0; di<m_dispLevels; di++)//for(int d=0; d<m_dispLevels; d++)
 	{
+		int d = di + m_dispMin;
 		for(int i=0; i<H; i++)
 		{
 			for(int j=0; j<W; j++)
@@ -27,7 +28,7 @@ void SGM::rawCostCalculate()
 				//if (useMask && m_maskImg.at<uchar>(i,j) == 0) continue;
 				int jr = max(0,j-d);
 	
-				m_rawCostCube->at<double>(d,i,j) = abs(( double)m_imgL.at<uchar>(i,j) - ( double)m_imgR.at<uchar>(i,jr) );
+				m_rawCostCube->at<double>(di,i,j) = abs(( double)m_imgL.at<uchar>(i,j) - ( double)m_imgR.at<uchar>(i,jr) );//m_rawCostCube->at<double>(d,i,j) = abs(( double)m_imgL.at<uchar>(i,j) - ( double)m_imgR.at<uchar>(i,jr) );
 				
 			}
 		}
@@ -36,12 +37,14 @@ void SGM::rawCostCalculate()
 }
 void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 {
-	for(int d=0; d<m_dispLevels; d++)
+	for(int di=0; di<m_dispLevels; di++)
 	{
+		int d = di + m_dispMin;
 		double smooth_term = 1e20;// 
-		for(int d_p=0; d_p<m_dispLevels; d_p++)
+		for(int d_pi=0; d_pi<m_dispLevels; d_pi++)//for(int d_p=0; d_p<m_dispLevels; d_p++)
 		{
-			double priorCost = Lr->at<double>(d_p,y_r,x_r);//double priorCost = m_sgmCostCube->at<double>(d,y_r,x_r);
+			int d_p = d_pi + m_dispMin;
+			double priorCost = Lr->at<double>(d_pi,y_r,x_r);//double priorCost = Lr->at<double>(d_p,y_r,x_r);//double priorCost = m_sgmCostCube->at<double>(d,y_r,x_r);
 
 			if (d_p == d)
 			{
@@ -63,15 +66,15 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 					);
 			}
 		}
-		Lr->at<double>(d,y,x) += m_rawCostCube->at<double>(d,y,x) + smooth_term;//m_sgmCostCube->at<double>(d,y,x) = m_rawCostCube->at<double>(d,y,x) + smooth_term;
+		Lr->at<double>(di,y,x) += m_rawCostCube->at<double>(di,y,x) + smooth_term;//Lr->at<double>(d,y,x) += m_rawCostCube->at<double>(d,y,x) + smooth_term;//m_sgmCostCube->at<double>(d,y,x) = m_rawCostCube->at<double>(d,y,x) + smooth_term;
 
 	}
 
 
 	int m = 1e20;
-	for(int d_p=0; d_p<m_dispLevels; d_p++)
+	for(int d_pi=0; d_pi<m_dispLevels; d_pi++)
 	{
-		if (Lr->at<double>(d_p,y_r,x_r) < m) m = Lr->at<double>(d_p,y_r,x_r);
+		if (Lr->at<double>(d_pi,y_r,x_r) < m) m = Lr->at<double>(d_pi,y_r,x_r);
 	}
 	assert(m != 1e20);
 	for(int dd=0; dd<m_dispLevels; dd++)
@@ -80,55 +83,55 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 	}
 
 }
-void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(int x,int y,int d, int x_r, int y_r)
-{
-//clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
-
-	for(int d=0; d<m_dispLevels; d++)
-	{
-		double smooth_term = 1e20;// 
-		for(int d_p=0; d_p<m_dispLevels; d_p++)
-		{
-			double priorCost = m_sgmCostCube->at<double>(d_p,y_r,x_r);//double priorCost = m_sgmCostCube->at<double>(d,y_r,x_r);
-
-			if (d_p == d)
-			{
-				smooth_term = min(smooth_term,priorCost);
-			}
-			else if (abs(d_p - d) == 1)
-			{
-				smooth_term = min(smooth_term, priorCost + m_P1);
-			}
-			else 
-			{
-				double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
-				double pp =0;
-				if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
-				else pp = m_P2;
-
-				smooth_term = min(smooth_term, priorCost +
-								max(m_P1, pp)
-								);
-			}
-		}
-		m_sgmCostCube->at<double>(d,y,x) += m_rawCostCube->at<double>(d,y,x) + smooth_term;//m_sgmCostCube->at<double>(d,y,x) = m_rawCostCube->at<double>(d,y,x) + smooth_term;
-
-	}
-
-
-	int m = 1e20;
-	for(int d_p=0; d_p<m_dispLevels; d_p++)
-	{
-		if (m_sgmCostCube->at<double>(d_p,y_r,x_r) < m) m = m_sgmCostCube->at<double>(d_p,y_r,x_r);
-	}
-	assert(m != 1e20);
-	for(int dd=0; dd<m_dispLevels; dd++)
-	{
-		m_sgmCostCube->at<double>(dd,y,x) -= m ;
-	}
-
- //if (cnt%100000 ==100000-1) cout<<clock()-timer<<endl;
-}
+//void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(int x,int y,int d, int x_r, int y_r)
+//{
+////clock_t timer;static int cnt=0;if (cnt++%10000==0)timer = clock();
+//
+//	for(int d=0; d<m_dispLevels; d++)
+//	{
+//		double smooth_term = 1e20;// 
+//		for(int d_p=0; d_p<m_dispLevels; d_p++)
+//		{
+//			double priorCost = m_sgmCostCube->at<double>(d_p,y_r,x_r);//double priorCost = m_sgmCostCube->at<double>(d,y_r,x_r);
+//
+//			if (d_p == d)
+//			{
+//				smooth_term = min(smooth_term,priorCost);
+//			}
+//			else if (abs(d_p - d) == 1)
+//			{
+//				smooth_term = min(smooth_term, priorCost + m_P1);
+//			}
+//			else 
+//			{
+//				double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
+//				double pp =0;
+//				if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
+//				else pp = m_P2;
+//
+//				smooth_term = min(smooth_term, priorCost +
+//								max(m_P1, pp)
+//								);
+//			}
+//		}
+//		m_sgmCostCube->at<double>(d,y,x) += m_rawCostCube->at<double>(d,y,x) + smooth_term;//m_sgmCostCube->at<double>(d,y,x) = m_rawCostCube->at<double>(d,y,x) + smooth_term;
+//
+//	}
+//
+//
+//	int m = 1e20;
+//	for(int d_p=0; d_p<m_dispLevels; d_p++)
+//	{
+//		if (m_sgmCostCube->at<double>(d_p,y_r,x_r) < m) m = m_sgmCostCube->at<double>(d_p,y_r,x_r);
+//	}
+//	assert(m != 1e20);
+//	for(int dd=0; dd<m_dispLevels; dd++)
+//	{
+//		m_sgmCostCube->at<double>(dd,y,x) -= m ;
+//	}
+//
+// //if (cnt%100000 ==100000-1) cout<<clock()-timer<<endl;
+//}
 void SGM::sgmCostCalculate()
 {
 	int H = m_imgL.rows;
@@ -145,33 +148,7 @@ void SGM::sgmCostCalculate()
 	m_Lr2 =  new Mat(3,size,CV_64FC1,Scalar(val));
 	m_Lr3 =  new Mat(3,size,CV_64FC1,Scalar(val));
 
-	////从下到上
-	//for(int y=H-1; y>=0; y--)
-	//{
-	//	for(int x=W-1; x>=0; x--)
-	//	{
-	//		//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
-	//		//for(int d=0; d<m_dispLevels; d++)
-	//		//{		
-	//		int x_r=0,y_r=0;
-	//		//if ()
-	//		
-	//		//bottom-left
-	//		x_r = max(x-1,0); y_r = min(y+1,H-1);
-	//		pathEvaluate(x, y, x_r, y_r);
-	//		//right
-	//		x_r = min(x+1,W-1); y_r = y;
-	//		pathEvaluate(x, y,  x_r, y_r);
-	//		//bottom-right
-	//		x_r = min(x+1,W-1); y_r = min(y+1,H-1);
-	//		pathEvaluate(x, y, x_r, y_r);
-	//		//bottom
-	//		x_r = x; y_r = min(y+1,H-1);
-	//		pathEvaluate(x, y, x_r, y_r);
-	//		
-	//		//}
-	//	}
-	//}
+	
 	//从上到下
 	for(int y=0; y<H; y++)
 	{
@@ -213,43 +190,55 @@ void SGM::sgmCostCalculate()
 			//}
 		}
 	}
-
-	////从下到上
-	//for(int y=H-1; y>=0; y--)
-	//{
-	//	for(int x=W-1; x>=0; x--)
-	//	{
-	//		//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
-	//		//for(int d=0; d<m_dispLevels; d++)
-	//		//{		
-	//			int x_r=0,y_r=0;
-	//			//if ()
-	//			//right
-	//			x_r = min(x+1,W-1); y_r = y;
-	//			pathEvaluate(x, y,  x_r, y_r);
-	//			//bottom-right
-	//			x_r = min(x+1,W-1); y_r = min(y+1,H-1);
-	//			pathEvaluate(x, y, x_r, y_r);
-	//			//bottom
-	//			x_r = x; y_r = min(y+1,H-1);
-	//			pathEvaluate(x, y, x_r, y_r);
-	//			//bottom-left
-	//			x_r = max(x-1,0); y_r = min(y+1,H-1);
-	//			pathEvaluate(x, y, x_r, y_r);
-	//		//}
-	//	}
-	//}
+	for(int i=0;i<H; i++)
+	{
+		for(int j=0; j<W; j++)
+		{
+			for(int di=0;di<m_dispLevels; di++)
+			{
+				m_sgmCostCube->at<double>(di,i,j) +=  m_Lr0->at<double>(di,i,j)
+					+ m_Lr1->at<double>(di,i,j)
+					+ m_Lr2->at<double>(di,i,j)
+					+ m_Lr3->at<double>(di,i,j);
+			}
+		}
+	}
+	//从下到上
+	for(int y=H-1; y>=0; y--)
+	{
+		for(int x=W-1; x>=0; x--)
+		{
+			//if (useMask && m_maskImg.at<uchar>(y,x) == 0) continue;
+			//for(int d=0; d<m_dispLevels; d++)
+			//{		
+				int x_r=0,y_r=0;
+				//if ()
+				//right
+				x_r = min(x+1,W-1); y_r = y;
+				pathEvaluate(x, y,  x_r, y_r,m_Lr0);
+				//bottom-right
+				x_r = min(x+1,W-1); y_r = min(y+1,H-1);
+				pathEvaluate(x, y, x_r, y_r,m_Lr1);
+				//bottom
+				x_r = x; y_r = min(y+1,H-1);
+				pathEvaluate(x, y, x_r, y_r,m_Lr2);
+				//bottom-left
+				x_r = max(x-1,0); y_r = min(y+1,H-1);
+				pathEvaluate(x, y, x_r, y_r,m_Lr3);
+			//}
+		}
+	}
 	
 	for(int i=0;i<H; i++)
 	{
 		for(int j=0; j<W; j++)
 		{
-			for(int d=0;d<m_dispLevels; d++)
+			for(int di=0;di<m_dispLevels; di++)
 			{
-				m_sgmCostCube->at<double>(d,i,j) =  m_Lr0->at<double>(d,i,j)
-					+ m_Lr1->at<double>(d,i,j)
-					+ m_Lr2->at<double>(d,i,j)
-					+ m_Lr3->at<double>(d,i,j);
+				m_sgmCostCube->at<double>(di,i,j) +=  m_Lr0->at<double>(di,i,j)
+					+ m_Lr1->at<double>(di,i,j)
+					+ m_Lr2->at<double>(di,i,j)
+					+ m_Lr3->at<double>(di,i,j);
 			}
 		}
 	}
@@ -261,16 +250,16 @@ void SGM::sgmCostCalculate()
 
 			double min = 1e20;
 			int d_min = 0;
-			for(int d=0; d<m_dispLevels; d++)
+			for(int di=0; di<m_dispLevels; di++)
 			{
-				double cost_t = m_sgmCostCube->at<double>(d,i,j);
+				double cost_t = m_sgmCostCube->at<double>(di,i,j);
 				if (cost_t < min)
 				{
 					min = cost_t;
-					d_min = d;
+					d_min = di;
 				}
 			}
-			m_dispImg.at<double>(i,j) = d_min;
+			m_dispImg.at<double>(i,j) = d_min + m_dispMin;//m_dispImg.at<double>(i,j) = d_min;
 		}
 	}
 

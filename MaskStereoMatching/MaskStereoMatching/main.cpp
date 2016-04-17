@@ -26,11 +26,11 @@ int main()
 	Mat dispImg(imgL.size(),CV_64FC1,Scalar(0));
 
 	clock_t timer = clock();
-	SGM sgm(imgL,imgR,dispImg,100,2,500);//SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,100,10,1000);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
+	SGM sgm(imgL,imgR,dispImg,30,70,2,1000);//SGM sgm(imgL,imgR,dispImg,130,250,2,1000);//SGM sgm(imgL,imgR,maskImgL,maskImgR,dispImg,100,10,1000);//SGM sgm(imgL,imgR,dispImg,50,2,100);//SGM sgm(imgL,imgR,dispImg,20,2,100);
 	sgm.sgmRun(); //sgm.maskSgmRun(); //sgm.sgmRun(); 
 	cout<<clock()-timer<<endl;
 
-	//imwrite("data4/disp.jpg",dispImg);
+	imwrite("data4/disp.jpg",dispImg);
 	imshow("1",imgL);
 	imshow("2",dispImg/100);
 	waitKey(0);

@@ -18,6 +18,7 @@ private:
 	std::vector<std::vector <int> > m_leftMaskEdge; //saving the x location of L&R side of the mask in m_maskImgL;
 	std::vector<std::vector <int> > m_rightMaskEdge;
 	std::vector<std::vector <int> > m_maskEdgeDisp;
+	int m_dispMin;
 	int m_dispLevels;
 	double m_P1, m_P2;
 
@@ -32,8 +33,8 @@ private:
 public:
 	
 	SGM();
-	SGM(const cv::Mat &imgL,const cv::Mat &imgR,cv::Mat & dispImg,int dispLevels = 20,double P1=1,double P2=500)
-		:m_dispImg(dispImg),m_dispLevels(dispLevels),m_P1(P1),m_P2(P2)
+	SGM(const cv::Mat &imgL,const cv::Mat &imgR,cv::Mat & dispImg,int dispMin=0, int dispLevels = 20,double P1=1,double P2=500)
+		:m_dispImg(dispImg),m_dispLevels(dispLevels),m_P1(P1),m_P2(P2),m_dispMin(dispMin)
 	{
 		m_imgL = imgL.clone();
 		m_imgR = imgR.clone();

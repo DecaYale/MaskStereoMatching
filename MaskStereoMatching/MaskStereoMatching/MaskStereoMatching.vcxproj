@@ -136,6 +136,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <IgnoreSpecificDefaultLibraries>cudart.lib</IgnoreSpecificDefaultLibraries>
+      <HeapReserveSize>4000000000</HeapReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
