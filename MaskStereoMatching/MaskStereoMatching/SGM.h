@@ -10,6 +10,10 @@ private:
 	cv::Mat & m_dispImg;
 	cv::Mat * m_rawCostCube;
 	cv::Mat * m_sgmCostCube;
+	cv::Mat * m_Lr0Min4;
+	cv::Mat * m_Lr1Min4;
+	cv::Mat * m_Lr2Min4;
+	cv::Mat * m_Lr3Min4;
 	cv::Mat * m_Lr0;
 	cv::Mat * m_Lr1;
 	cv::Mat * m_Lr2;
@@ -30,6 +34,7 @@ private:
 	void maskSgmCostCalculate();
 	inline void maskPathEvaluate(int x,int y, int x_r, int y_r);
 	inline void pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr);
+	inline void pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr, cv::Mat * LrMin4);
 public:
 	
 	SGM();
@@ -44,7 +49,11 @@ public:
 		m_Lr1 = NULL;
 		m_Lr2 = NULL;
 		m_Lr3 = NULL;
-		//cv::Mat m_dispImg(imgL.size(),CV_64FC1,Scalar(0));
+		m_Lr0Min4 =NULL;
+		m_Lr1Min4 =NULL;	
+		m_Lr2Min4 =NULL;	
+		m_Lr3Min4 =NULL;	
+			//cv::Mat m_dispImg(imgL.size(),CV_64FC1,Scalar(0));
 		//m_dispImg = dispImg;
 	}
 	SGM(const cv::Mat &imgL,const cv::Mat &imgR,const cv::Mat & maskImgL,const cv::Mat &maskImgR, cv::Mat & dispImg,int dispLevels = 20,double P1=1,double P2=500)

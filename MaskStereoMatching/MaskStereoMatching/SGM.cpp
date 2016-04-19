@@ -37,6 +37,12 @@ void SGM::rawCostCalculate()
 }
 void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 {
+
+	double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
+	double pp =0;
+	if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
+	else pp = m_P2;
+
 	for(int di=0; di<m_dispLevels; di++)
 	{
 		int d = di + m_dispMin;
@@ -56,10 +62,10 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 			}
 			else 
 			{
-				double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
-				double pp =0;
-				if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
-				else pp = m_P2;
+				/*double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
+				double pp =0;*/
+				/*if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
+				else pp = m_P2;*/
 
 				smooth_term = min(smooth_term, priorCost +
 					max(m_P1, pp)
@@ -82,6 +88,116 @@ void SGM::pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr)
 		Lr->at<double>(dd,y,x) -= m ;
 	}
 
+}
+void SGM:: pathEvaluate(int x,int y, int x_r, int y_r,cv::Mat * Lr, cv::Mat * LrMin4)
+{
+	double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
+	double pp =0;
+	if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
+	else pp = m_P2;
+
+	/*vector<double> lr_p(m_dispLevels);
+	vector<int >idxMin4(4);
+	vector<bool> marked(m_dispLevels,false);*/
+	//marked.resize(m_dispLevels);
+	double *lr_p = new double[m_dispLevels];
+	int * idxMin4 = new int[4];
+	bool * marked = new bool[m_dispLevels];
+	memset(marked,false,sizeof(bool)* m_dispLevels);
+
+	for (int dp_i=0; dp_i<m_dispLevels; dp_i++)
+	{
+		double priorCost = Lr->at<double>(dp_i,y_r,x_r);
+		lr_p[dp_i] = priorCost;
+	}
+	for(int i=0;i<4;i++)//for(int i=0;i<lr_p.size();i++)
+	{
+
+		int idx = 0;
+		while(marked[idx]){ idx++;};
+
+		for(int j=idx+1; j<m_dispLevels; j++)
+		{
+			if (!marked[j] && lr_p[j] <= lr_p[idx] ) idx = j;  
+		}
+		marked[idx]= true;
+		idxMin4[i] = idx;
+	}
+	//for(int i=0; i<4; i++)
+	//{
+	//	Lr_pMin4.push_back(lr_p.at(i));
+	//}
+
+	for(int di=0; di<m_dispLevels; di++)
+	{
+		int d = di + m_dispMin;
+		double smooth_term = 1e20;// 
+		
+		int d_pi= di;// int d_p = d_pi + m_dispMin;
+		double priorCost = Lr->at<double>(d_pi,y_r,x_r);
+		smooth_term = min(smooth_term,priorCost);
+
+		d_pi= max(di-1,0);
+		priorCost = Lr->at<double>(d_pi,y_r,x_r);
+		smooth_term = min(smooth_term,priorCost);
+
+		d_pi= min(di+1,m_dispLevels-1);
+		priorCost = Lr->at<double>(d_pi,y_r,x_r);
+		smooth_term = min(smooth_term,priorCost);
+
+		for(int i=0; i<4; i++)
+		{
+			int idx = idxMin4[i];
+			if (idx != di && idx != max(di-1,0) && idx != min(di+1,m_dispLevels-1) )
+			{
+				priorCost = Lr->at<double>(d_pi,y_r,x_r);
+				smooth_term = min(smooth_term, priorCost +
+								max(m_P1, pp)
+								);
+				break;
+			}
+		}
+		//for(int d_pi=0; d_pi<m_dispLevels; d_pi++)//for(int d_p=0; d_p<m_dispLevels; d_p++)
+		//{
+		//	int d_p = d_pi + m_dispMin;
+		//	double priorCost = Lr->at<double>(d_pi,y_r,x_r);//double priorCost = Lr->at<double>(d_p,y_r,x_r);//double priorCost = m_sgmCostCube->at<double>(d,y_r,x_r);
+
+		//	if (d_p == d)
+		//	{
+		//		smooth_term = min(smooth_term,priorCost);
+		//	}
+		//	else if (abs(d_p - d) == 1)
+		//	{
+		//		smooth_term = min(smooth_term, priorCost + m_P1);
+		//	}
+		//	else 
+		//	{
+		//		/*double path_intensity_grad = abs( ( double)m_imgL.at<uchar>(y,x) - (double)m_imgL.at<uchar>(y_r,x_r));
+		//		double pp =0;*/
+		//		/*if (path_intensity_grad >0.001) pp = m_P2/path_intensity_grad;
+		//		else pp = m_P2;*/
+
+		//		smooth_term = min(smooth_term, priorCost +
+		//			max(m_P1, pp)
+		//			);
+		//	}
+		//}
+		Lr->at<double>(di,y,x) += m_rawCostCube->at<double>(di,y,x) + smooth_term;//Lr->at<double>(d,y,x) += m_rawCostCube->at<double>(d,y,x) + smooth_term;//m_sgmCostCube->at<double>(d,y,x) = m_rawCostCube->at<double>(d,y,x) + smooth_term;
+
+	}
+
+
+	/*int m = 1e20;
+	for(int d_pi=0; d_pi<m_dispLevels; d_pi++)
+	{
+		if (Lr->at<double>(d_pi,y_r,x_r) < m) m = Lr->at<double>(d_pi,y_r,x_r);
+	}
+	assert(m != 1e20);*/
+	int m =  Lr->at<double>(idxMin4[0],y_r,x_r);
+	for(int dd=0; dd<m_dispLevels; dd++)
+	{
+		Lr->at<double>(dd,y,x) -= m ;
+	}
 }
 //void SGM::pathEvaluate(int x,int y, int x_r, int y_r)//void SGM::pathEvaluate(int x,int y,int d, int x_r, int y_r)
 //{
@@ -147,7 +263,11 @@ void SGM::sgmCostCalculate()
 	m_Lr1 =  new Mat(3,size,CV_64FC1,Scalar(val));
 	m_Lr2 =  new Mat(3,size,CV_64FC1,Scalar(val));
 	m_Lr3 =  new Mat(3,size,CV_64FC1,Scalar(val));
-
+	
+	m_Lr0Min4 = new Mat(m_imgL.size(),CV_32SC4,Scalar(-1) );
+	/*m_Lr1Min4 = new Mat(m_imgL.size(),CV_32SC4,Scalar(-1) );
+	m_Lr2Min4 = new Mat(m_imgL.size(),CV_32SC4,Scalar(-1) );
+	m_Lr3Min4 = new Mat(m_imgL.size(),CV_32SC4,Scalar(-1) );*/
 //clock_t timer = clock();
 	//从上到下
 	for(int y=0; y<H; y++)
@@ -163,28 +283,28 @@ void SGM::sgmCostCalculate()
 				//if(x>=1)
 				{
 					x_r = max(x-1,0); y_r = y;
-					pathEvaluate(x, y, x_r, y_r,m_Lr0);
+					pathEvaluate(x, y, x_r, y_r,m_Lr0,m_Lr0Min4);
 				}
 				
 				//top-left
 				//if (x>=1 && y>=1)
 				{
 					x_r = max(x-1,0); y_r = max(y-1,0);
-					pathEvaluate(x, y, x_r, y_r,m_Lr1);
+					pathEvaluate(x, y, x_r, y_r,m_Lr1,m_Lr0Min4);
 				}
 				
 				//top
 				//if (y>=1)
 				{
 					x_r = x; y_r = max(y-1,0);
-					pathEvaluate(x, y, x_r, y_r,m_Lr2);
+					pathEvaluate(x, y, x_r, y_r,m_Lr2,m_Lr0Min4);
 				}
 				
 				//top-right
 			//	if (y>=1 && x<W-1)
 				{
 					x_r = min(x+1,W-1); y_r = max(y-1,0);
-					pathEvaluate(x, y, x_r, y_r,m_Lr3);
+					pathEvaluate(x, y, x_r, y_r,m_Lr3,m_Lr0Min4);
 				}
 				
 			//}
@@ -216,16 +336,16 @@ void SGM::sgmCostCalculate()
 				//if ()
 				//right
 				x_r = min(x+1,W-1); y_r = y;
-				pathEvaluate(x, y,  x_r, y_r,m_Lr0);
+				pathEvaluate(x, y,  x_r, y_r,m_Lr0,m_Lr0Min4);//pathEvaluate(x, y,  x_r, y_r,m_Lr0);
 				//bottom-right
 				x_r = min(x+1,W-1); y_r = min(y+1,H-1);
-				pathEvaluate(x, y, x_r, y_r,m_Lr1);
+				pathEvaluate(x, y, x_r, y_r,m_Lr1,m_Lr0Min4);
 				//bottom
 				x_r = x; y_r = min(y+1,H-1);
-				pathEvaluate(x, y, x_r, y_r,m_Lr2);
+				pathEvaluate(x, y, x_r, y_r,m_Lr2,m_Lr0Min4);
 				//bottom-left
 				x_r = max(x-1,0); y_r = min(y+1,H-1);
-				pathEvaluate(x, y, x_r, y_r,m_Lr3);
+				pathEvaluate(x, y, x_r, y_r,m_Lr3,m_Lr0Min4);
 			//}
 		}
 	}

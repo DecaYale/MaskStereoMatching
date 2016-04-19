@@ -21,7 +21,7 @@ int main()
 	Mat dispImg;
 	//imshow("1",maskImgR);waitKey(0);
 	clock_t timer = clock();
-	CMaskSGBM msgbm(0,320,1,1000);
+	CMaskSGBM msgbm(0,240,1,1000);
 
 	msgbm(imgL,imgR,maskImgL,maskImgR,dispImg);
 
