@@ -1,27 +1,22 @@
-﻿Build started 2016/4/15 20:55:39.
+﻿Build started 2016/4/19 13:09:02.
      1>Project "F:\GitHub\MaskStereoMatching\MaskStereoMatching\MaskStereoMatching\MaskStereoMatching.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Debug\MaskStereoMatching.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /Gd /TP /errorReport:prompt SGM.cpp main.cpp
-         SGM.cpp
-     1>SGM.cpp(71): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-     1>SGM.cpp(71): warning C4056: overflow in floating-point constant arithmetic
-     1>SGM.cpp(74): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-     1>SGM.cpp(119): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-     1>SGM.cpp(119): warning C4056: overflow in floating-point constant arithmetic
-     1>SGM.cpp(122): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-     1>SGM.cpp(446): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
-     1>SGM.cpp(446): warning C4056: overflow in floating-point constant arithmetic
-     1>SGM.cpp(449): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /Gd /TP /errorReport:prompt maskSGBM.cpp
+         maskSGBM.cpp
+     1>f:\github\maskstereomatching\maskstereomatching\maskstereomatching\MaskSGBM.h(26): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>f:\github\maskstereomatching\maskstereomatching\maskstereomatching\MaskSGBM.h(26): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>maskSGBM.cpp(67): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>maskSGBM.cpp(67): warning C4056: overflow in floating-point constant arithmetic
+     1>maskSGBM.cpp(102): warning C4244: 'initializing' : conversion from 'double' to 'int', possible loss of data
+     1>maskSGBM.cpp(102): warning C4056: overflow in floating-point constant arithmetic
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Debug\MaskStereoMatching.exe" /INCREMENTAL /NOLOGO opencv_ml2410d.lib opencv_objdetect2410.lib opencv_ts2410.lib opencv_video2410.lib opencv_nonfree2410.lib opencv_ocl2410.lib opencv_photo2410.lib opencv_stitching2410.lib opencv_superres2410.lib opencv_videostab2410.lib opencv_calib3d2410d.lib opencv_contrib2410d.lib opencv_core2410d.lib opencv_features2d2410d.lib opencv_flann2410d.lib opencv_gpu2410d.lib opencv_highgui2410d.lib opencv_imgproc2410d.lib opencv_legacy2410d.lib opencv_objdetect2410d.lib opencv_ts2410d.lib opencv_video2410d.lib opencv_nonfree2410d.lib opencv_ocl2410d.lib opencv_photo2410d.lib opencv_stitching2410d.lib opencv_superres2410d.lib opencv_videostab2410d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Debug\MaskStereoMatching.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Debug\MaskStereoMatching.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Debug\MaskStereoMatching.lib" /MACHINE:X64 x64\Debug\MaskStereoMatching.exe.embed.manifest.res
          x64\Debug\main.obj
+         x64\Debug\maskSGBM.obj
          x64\Debug\SGM.obj
          MaskStereoMatching.vcxproj -> F:\GitHub\MaskStereoMatching\MaskStereoMatching\x64\Debug\MaskStereoMatching.exe
        Manifest:
@@ -37,4 +32,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.06
+Time Elapsed 00:00:01.77

@@ -148,7 +148,7 @@ void SGM::sgmCostCalculate()
 	m_Lr2 =  new Mat(3,size,CV_64FC1,Scalar(val));
 	m_Lr3 =  new Mat(3,size,CV_64FC1,Scalar(val));
 
-	
+//clock_t timer = clock();
 	//从上到下
 	for(int y=0; y<H; y++)
 	{
@@ -190,6 +190,7 @@ void SGM::sgmCostCalculate()
 			//}
 		}
 	}
+//cout<<clock()-timer<<endl;
 	for(int i=0;i<H; i++)
 	{
 		for(int j=0; j<W; j++)

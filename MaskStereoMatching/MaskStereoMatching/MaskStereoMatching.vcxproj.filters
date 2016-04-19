@@ -21,9 +21,15 @@
     <ClCompile Include="SGM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="maskSGBM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SGM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="maskSGBM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
