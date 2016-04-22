@@ -63,6 +63,28 @@ void CMaskSGBM::getMaskROI(const cv::Mat & maskImgL, const cv::Mat & maskImgR )
 			}
 		}
 	}
+	//¼ÆËã×ó¡¢ÓÒ±ß½çdisp ·¶Î§
+	int dispMin = 1e20;
+	int dispMax = 0;
+	for(int i=0; i<H; i++)
+	{
+		if (m_leftMaskEdge[i].size()!=0 && m_rightMaskEdge[i].size()!=0)
+		{
+			int disp = abs(m_leftMaskEdge[i].at(0) - m_rightMaskEdge[i].at(0) );
+			if (disp < dispMin) dispMin = disp;
+			if (disp > dispMax) dispMax = disp;
+
+			disp = abs(m_leftMaskEdge[i].at(1) - m_rightMaskEdge[i].at(1) );
+			if (disp < dispMin) dispMin = disp;
+			if (disp > dispMax) dispMax = disp;
+		}
+	}
+	if (m_dispMin == -1 && m_dispLevels ==-1)
+	{
+		m_dispMin = max( 0,dispMin -10 );
+		m_dispLevels =  (dispMax + 10 - m_dispMin) + 16-(dispMax + 10 - m_dispMin)%16;
+	}
+
 	//Çó×óÍ¼ÏñROI
 	int ltx = 1e20,lty=0;
 	int rbx = 0,rby=0;
@@ -164,12 +186,84 @@ void CMaskSGBM::getMaskROI(const cv::Mat & maskImgL, const cv::Mat & maskImgR )
 
 void CMaskSGBM::getDispFromROI(const cv::Mat & imgL, const cv::Mat &imgR, cv::Mat & dispImg)
 {
-	imshow("tmp",imgL(m_ImgLROI));imshow("tmp2",imgR(m_ImgRROI));
-	m_sgbm(imgL(m_ImgLROI), imgR(m_ImgRROI), dispImg);
+
+	dispImg.create(imgL.size(),CV_16SC1);
+	
+	m_sgbm(imgL(m_ImgLROI), imgR(m_ImgRROI), dispImg(m_ImgLROI));
 }
 void CMaskSGBM::operator() (const cv::Mat & imgL, const cv::Mat &imgR, const cv::Mat maskImgL, const cv::Mat maskImgR, cv::Mat & dispImg)
 {
 	getMaskROI(maskImgL, maskImgR );
+
+	m_sgbm = cv::StereoSGBM(m_dispMin,m_dispLevels,1,m_P1, m_P2);
 	getDispFromROI(imgL, imgR, dispImg);
 }
 
+void CMaskSGBM::meanFilter(cv::Mat & dispImg)
+{
+	int height = dispImg.rows, width = dispImg.cols;
+
+	dispImg.convertTo(dispImg,CV_64FC1);
+	Mat dispIntegral;
+	dispIntegral = dispImg.clone();
+	//imshow("test",dispIntegral/300/16);waitKey(0);
+	//dispIntegral.convertTo(dispIntegral,)
+	double * dispImg_d = (double *) ((dispIntegral).data);
+	integralImgCal(dispImg_d,height,width,(dispIntegral).step[0]);
+
+	//imshow("test3",dispIntegral);waitKey(0);
+	for(int i=0; i<height; i++)
+	{
+		for(int j=0; j<width; j++)
+		{
+			int i_ = max(0,i-m_filterWidth);
+			int j_ = max(0,j-m_filterWidth);
+			int w1 = min(m_filterWidth,i+1);
+			int w2 = min(m_filterWidth,j+1);
+
+			dispImg.at<double>(i,j) = (
+				(dispIntegral).at<double>(i,j)
+				+(dispIntegral).at<double>(i_,j_)
+				-(dispIntegral).at<double>(i_,j)
+				-(dispIntegral).at<double>(i,j_)
+				) / (w1 * w2); 
+			/*double test = dispImg.at<double>(i,j);
+			if (dispIntegral.at<double>(i,j)
+				+dispIntegral.at<double>(i_,j_)
+				-dispIntegral.at<double>(i_,j)
+				-dispIntegral.at<double>(i,j_) -0 >0.001 )
+			{
+				test =0;
+			}*/
+			
+		}
+	}
+	//delete dispIntegral;
+	//imshow("test2",dispImg/300/16);waitKey(0);
+
+}
+void CMaskSGBM::integralImgCal(double * originImg, int height,int width,int widthStep)
+{
+	//first row
+	double rs = 0.0f;
+	int wStep = widthStep/sizeof(double);
+
+	for(int j=0; j<width; j++)
+	{
+		rs += originImg[j];
+		originImg[j] = rs;
+	}
+	//remaining rows
+	for(int i=1; i<height; i++)
+	{
+		double rs = 0.0;
+		for(int j=0; j<width; j++)
+		{
+			int idx = i*wStep + j;
+			rs += originImg[idx];
+			originImg[idx] = rs + originImg[(i-1)*wStep +j ];
+		}
+	}
+
+
+}

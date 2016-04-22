@@ -12,26 +12,37 @@ using namespace std;
 using namespace cv;
 
 #if 1
+
 int main()
 {
-	const cv::Mat imgL = cv::imread("data4/rect_left_000035.jpg",0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
-	const cv::Mat imgR = cv::imread("data4/rect_right_000035.jpg",0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	cv::Mat imgL = cv::imread("data4/rect_left_000035.jpg",0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	cv::Mat imgR = cv::imread("data4/rect_right_000035.jpg",0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
 	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
 	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
 	Mat dispImg;
 	//imshow("1",maskImgR);waitKey(0);
 	clock_t timer = clock();
-	CMaskSGBM msgbm(0,240,1,1000);
-
+	CMaskSGBM msgbm(-1,-1,1,1000,10);
 	msgbm(imgL,imgR,maskImgL,maskImgR,dispImg);
+	
+	//dispImg.convertTo(dispImg,CV_64FC1);
+	//dispImg = dispImg/16/320;
+	//msgbm.meanFilter(dispImg);
+	//imshow("2",imgL/255);
 
+	msgbm.meanFilter(dispImg);
+	//imshow("3",imgL/255);*/
+	
+	msgbm.meanFilter(dispImg);
+	msgbm.meanFilter(dispImg);
 	//StereoSGBM sgm(0,320,1,p1,p2);
 	Mat dispF;
 	//sgm(imgL,imgR,disp);
 	cout<<clock()-timer<<endl;
+
 	dispImg.convertTo(dispF,CV_64FC1);
 	imwrite("dispSgmOpenCV.jpg",dispF/16);
-	imshow("1",dispF/320/16);
+	imshow("1",(dispF)/320/16);
 	waitKey(0);
 }
 #elif 1
