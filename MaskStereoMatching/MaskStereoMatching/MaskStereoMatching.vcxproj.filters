@@ -24,12 +24,18 @@
     <ClCompile Include="maskSGBM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParallelMaskSGBM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SGM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="maskSGBM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParallelMaskSGBM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

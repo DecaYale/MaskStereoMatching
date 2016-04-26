@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "time.h"
 
 #include <cxcore.h>
@@ -8,33 +9,79 @@
 
 #include "SGM.h"
 #include "MaskSGBM.h"
+#include "ParallelMaskSGBM.h"
+
+#include <omp.h>
 using namespace std;
 using namespace cv;
 
 #if 1
-
 int main()
 {
 	cv::Mat imgL = cv::imread("data4/rect_left_000035.jpg",0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
 	cv::Mat imgR = cv::imread("data4/rect_right_000035.jpg",0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
 	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
 	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
+
+	int threadNum = 8;
+	int dispMin=-1;
+	int dispLevels=-1;
+	double P1=1; double P2=1000;int filterWidth = 1;
+	CParallelMaskSGBM pmsgbm(threadNum, dispMin,dispLevels,P1,P2,filterWidth );
+
 	Mat dispImg;
+clock_t timer = clock();
+	pmsgbm(imgL,imgR,maskImgL, maskImgR, dispImg);
+cout<<clock()-timer<<endl;
+	Mat dispF;
+
+	dispImg.convertTo(dispF,CV_64FC1);
+	imwrite("dispSgmOpenCV.jpg",dispF/16);
+	imshow("1",dispF/16/320);
+	waitKey(0);
+}
+#elif 1
+int main()
+{
+	// test class CMaskSGBM
+	cv::Mat imgL = cv::imread("data4/rect_left_000035.jpg",0);//("data4/rect_left_000035.jpg",0);//("./data1/im0.ppm", 0);//(dirL, 0);//("./data/scene1.row3.col3.ppm", 0);//("./data2/view1_half.png", 0);//("./data/scene1.row3.col3.ppm", 0); //Load as grayscale
+	cv::Mat imgR = cv::imread("data4/rect_right_000035.jpg",0);//("data4/rect_right_000035.jpg",0);//("./data1/im1.ppm", 0);// (dirR, 0);//("./data/scene1.row3.col4.ppm", 0);
+	const cv::Mat maskImgL = cv::imread("data4/mask_rect_left_000035.jpg",0);
+	const cv::Mat maskImgR = cv::imread("data4/mask_rect_right_000035.jpg",0);
+	Mat dispImg;
+	Mat dispImg2;
 	//imshow("1",maskImgR);waitKey(0);
 	clock_t timer = clock();
-	CMaskSGBM msgbm(-1,-1,1,1000,10);
-	msgbm(imgL,imgR,maskImgL,maskImgR,dispImg);
+	CMaskSGBM msgbm(-1,-1,1,1000,30);
+	//msgbm(imgL,imgR,maskImgL,maskImgR,dispImg);
+
+	//CMaskSGBM msgbm2(-1,-1,1,1000,30);
+	//msgbm2(imgL,imgR,maskImgL,maskImgR,dispImg);
+	//CMaskSGBM msgbm_v[] = {msgbm,msgbm2};
+	//Mat * dispImg_v[] = {&dispImg,&dispImg2};
+
+	int coreNum = omp_get_num_procs();//获得处理器个数
+	cout<< coreNum<<endl;
+#pragma omp parallel for
+	for(int i=0; i<1; i++)
+	{
+		msgbm (imgL,imgR,maskImgL,maskImgR, dispImg);
+	}
 	
 	//dispImg.convertTo(dispImg,CV_64FC1);
 	//dispImg = dispImg/16/320;
 	//msgbm.meanFilter(dispImg);
 	//imshow("2",imgL/255);
 
-	msgbm.meanFilter(dispImg);
-	//imshow("3",imgL/255);*/
-	
-	msgbm.meanFilter(dispImg);
-	msgbm.meanFilter(dispImg);
+	//msgbm.meanFilter(dispImg);
+	////imshow("3",imgL/255);*/
+	//
+	//msgbm.meanFilter(dispImg);
+	//msgbm.meanFilter(dispImg);
+	//msgbm.meanFilter(dispImg);
+	//msgbm.meanFilter(dispImg);
+	//msgbm.meanFilter(dispImg);
+
 	//StereoSGBM sgm(0,320,1,p1,p2);
 	Mat dispF;
 	//sgm(imgL,imgR,disp);
@@ -42,6 +89,15 @@ int main()
 
 	dispImg.convertTo(dispF,CV_64FC1);
 	imwrite("dispSgmOpenCV.jpg",dispF/16);
+	ofstream ofile("disp.txt");
+	ofile<<dispF.rows<<" "<<dispF.cols<<endl;
+	for(int i=0; i<dispF.rows; i++)
+	{
+		for(int j=0; j<dispF.cols; j++)
+		{
+			ofile<<dispF.at<double>(i,j)/16/300<<' ';
+		}
+	}
 	imshow("1",(dispF)/320/16);
 	waitKey(0);
 }

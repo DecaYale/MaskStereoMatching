@@ -10,6 +10,9 @@ void CMaskSGBM::getMaskROI(const cv::Mat & maskImgL, const cv::Mat & maskImgR )
 	int W = maskImgL.cols;
 	int H = maskImgL.rows;
 	//vector<vector <int> > leftMaskEdge;
+	m_leftMaskEdge.clear();
+	m_rightMaskEdge.clear();
+	 
 	m_leftMaskEdge.resize(H);
 	m_rightMaskEdge.resize(H);
 	//ÌáÈ¡×ó mask ±ß½ç
@@ -191,12 +194,36 @@ void CMaskSGBM::getDispFromROI(const cv::Mat & imgL, const cv::Mat &imgR, cv::Ma
 	
 	m_sgbm(imgL(m_ImgLROI), imgR(m_ImgRROI), dispImg(m_ImgLROI));
 }
+void CMaskSGBM::refine(cv:: Mat & dispImg)
+{
+	int H = dispImg.rows;
+	int W = dispImg.cols;
+	for(int i=0; i<H; i++)
+	{
+		for(int j=0; j<W; j++)
+		{
+			int i_ = max(0,i-1); 
+			int j_ = max(0,j-1);
+			int j__ = min(W-1,j+1);
+			if (dispImg.at<short int>(i,j) - m_dispMin*16 <0) 
+			{
+				dispImg.at<short int>(i,j) = 0.25* (dispImg.at<short int>(i,j_)
+											+ dispImg.at<short int>(i_,j_)
+											+ dispImg.at<short int>(i_,j)
+											+ dispImg.at<short int>(i_,j__) 
+											) ;
+
+			}
+		}
+	}
+}
 void CMaskSGBM::operator() (const cv::Mat & imgL, const cv::Mat &imgR, const cv::Mat maskImgL, const cv::Mat maskImgR, cv::Mat & dispImg)
 {
-	getMaskROI(maskImgL, maskImgR );
+	getMaskROI(maskImgL, maskImgR);
 
-	m_sgbm = cv::StereoSGBM(m_dispMin,m_dispLevels,1,m_P1, m_P2);
+	m_sgbm = cv::StereoSGBM(m_dispMin, m_dispLevels, 1, m_P1, m_P2);
 	getDispFromROI(imgL, imgR, dispImg);
+	refine(dispImg);
 }
 
 void CMaskSGBM::meanFilter(cv::Mat & dispImg)

@@ -1,7 +1,10 @@
+#pragma once
+
 #include <vector>
 #include "cxcore.h"
 #include "cvaux.h"
 #include "cxmisc.h"
+
 class CMaskSGBM
 {
 private:
@@ -23,13 +26,15 @@ private:
 	void getMaskROI(const cv::Mat & maskImgL, const cv::Mat & maskImgR );
 	void getDispFromROI(const cv::Mat & imgL, const cv::Mat &imgR, cv::Mat & dispImg);
 	void integralImgCal(double * originImg, int height,int width,int widthStep);
+	void CMaskSGBM::refine(cv:: Mat & dispImg);
 public:
-	CMaskSGBM(){};
+	//CMaskSGBM(){};
 	CMaskSGBM(int dispMin=-1,int dispLevels=-1, double P1=0, double P2=0,int filterWidth = 1)  //int dispMin=-1,int dispLevels=-1Ôò·ÅÆúmask¶¯Ì¬disp·¶Î§
 			:m_dispMin(dispMin), m_dispLevels(dispLevels), m_P1(P1), m_P2(P2), m_filterWidth(filterWidth)
 	{
 			
 	}
+
 	void operator() (const cv::Mat & imgL, const cv::Mat &imgR, const cv::Mat maskImgL, const cv::Mat maskImgR, cv::Mat &dispImg);
 	void meanFilter(cv::Mat & dispImg);
 
